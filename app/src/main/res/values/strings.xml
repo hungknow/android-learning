@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">jetpackex</string>
+    <string name="title_activity_main2">MainActivity2</string>
+
+    <!-- Home Screen -->
+    <string name="home_top_section_title">Top Stories for you</string>
+    <string name="home_popular_section_title">Popular on Jetnews</string>
+
+    <string name="home_post_min_read">%1$s - %2$d min read</string>
+</resources>
