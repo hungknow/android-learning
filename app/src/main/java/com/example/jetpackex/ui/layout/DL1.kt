@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
@@ -16,18 +19,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MenuOpen
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemColors
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Text
@@ -51,7 +62,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import kotlinx.coroutines.launch
-
 
 
 @Composable
@@ -108,7 +118,7 @@ fun DL1Wrapper(
         }) {
             DL1AppContent()
         }
-    } else {
+    } else if (navigationType == NavigationType.RAIL) {
         ModalNavigationDrawer(
             drawerContent = {
                 ModalDrawerSheet {
@@ -127,15 +137,26 @@ fun DL1Wrapper(
         ) {
             Row {
                 AnimatedVisibility(visible = navigationType == NavigationType.RAIL) {
-                    Box(
-                        Modifier
-                            .background(Color.LightGray)
-                            .width(50.dp)
-                            .fillMaxHeight()
+                    DL1NavigationRail(
+                        selectedDestination = selectedDestination,
+                        onDrawerClicked = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
                     )
                 }
                 DL1AppContent()
             }
+        }
+    } else {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                DL1AppContent()
+            }
+            DL1BottomNavigationBar(selectedDestination = selectedDestination)
         }
     }
 }
@@ -383,6 +404,92 @@ fun DL1ModalNavigationDrawerContent(
             measurePolicy = navigationMeasurePolicy(navigationContentPosition)
 
         )
+    }
+}
+
+@Composable
+fun DL1NavigationRail(
+    selectedDestination: String,
+    onDrawerClicked: () -> Unit = {},
+) {
+    NavigationRail(
+        modifier = Modifier.fillMaxHeight(),
+        containerColor = MaterialTheme.colorScheme.inverseOnSurface
+    ) {
+        Column(
+            modifier = Modifier.layoutId(LayoutType.HEADER),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            NavigationRailItem(
+                selected = false,
+                onClick = onDrawerClicked,
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = null
+                    )
+                }
+            )
+            FloatingActionButton(
+                onClick = {},
+                modifier = Modifier.padding(top = 8.dp, bottom = 32.dp),
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                )
+            }
+            Spacer(Modifier.height(8.dp)) // NavigationRailHeaderPadding
+            Spacer(Modifier.height(4.dp)) // NavigationRailVerticalPadding
+        }
+
+        Column(
+            modifier = Modifier.layoutId(LayoutType.CONTENT),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            TOP_LEVEL_DESTINATIONS.forEach { destination ->
+                NavigationRailItem(
+//                    label = {
+//                        Text(
+//                            text = destination.iconText,
+//                            modifier = Modifier.padding(horizontal = 16.dp)
+//                        )
+//                    },
+                    icon = {
+                        Icon(
+                            imageVector = destination.selectedIcon,
+                            contentDescription = destination.iconText,
+                        )
+                    },
+                    selected = selectedDestination == destination.route,
+                    onClick = { /*TODO*/ },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DL1BottomNavigationBar(
+    selectedDestination: String,
+//    navigateToTopLevelDestination: (TopLevelDestination) -> Unit
+) {
+    NavigationBar(modifier = Modifier.fillMaxWidth()) {
+        TOP_LEVEL_DESTINATIONS.forEach { destination ->
+            NavigationBarItem(
+                selected = selectedDestination == destination.route,
+                onClick = { /*TODO*/ },
+                icon = {
+                    Icon(
+                        imageVector = destination.selectedIcon,
+                        contentDescription = null
+                    )
+                })
+        }
     }
 }
 
